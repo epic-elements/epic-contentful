@@ -1,0 +1,73 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<dom-module id="epic-contentful">
+<template>
+    <iron-ajax
+        auto="[[auto]]"
+      url="[[url]]"
+      handle-as="json"
+      last-response="{{response}}"
+      debounce-duration="300"></iron-ajax>
+    <content></content>
+</template>
+<script>
+(function() {
+  'use strict';
+  class EpicContentful {
+    beforeRegister() {
+      this.is = 'epic-contentful';
+      this.properties = {
+          token: {
+              type: String,
+              notify: true,
+              value: ''
+          },
+          space: {
+              type: String,
+              notify: true,
+              value: ''
+          },
+          contentType:{
+              type: String,
+              notify: true,
+              value: ''
+          },
+          resourceType:{
+              type: String,
+              notify: true,
+              value: 'entries'
+          },
+          auto: {
+              type: Boolean,
+              notify: true,
+              value: true
+          },
+          limit: {
+            type: Number,
+            notify: true,
+            value: 100
+        },
+        response: {
+            notify: true
+        },
+          url: {
+              type: String,
+              notify: true,
+              computed: '_computeUrl(token, space, resourceType, contentType, limit)'
+          }
+      };
+    }
+    // Define other lifecycle methods as you need.
+
+    _computeUrl(token, space, resourceType, contentType, limit) {
+        let url = `https://cdn.contentful.com/spaces/${space}/${resourceType}?access_token=${token}&content_type=${contentType}&limit=${limit}`;
+        console.log(url);
+        return url;
+    }
+  }
+  // Register the element using Polymer's constructor.
+  Polymer(EpicContentful);
+})();
+</script>
+</dom-module>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>epic-contentful demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../epic-contentful.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+  </head>
+  <body>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic epic-contentful Demo</h3>
+      <demo-snippet>
+        <template is="dom-bind">
+          <epic-contentful
+            token="###REPLACE WITH CONTENTFUL API TOKEN###"
+            space="##REPLACE WITH CONTENTFUL SPACE ID###"
+            content-type="###REPLACE WITH CONTENTFUL CONTENT TYPE###"
+            response="{{response}}"
+            ></epic-contentful>
+            <template is="dom-repeat" items="{{response.items}}">
+                <div>{{item.fields.name}}</div>
+            </template>
+        </template>
+      </demo-snippet>
+    </div>
+
+  </body>
+</html>
