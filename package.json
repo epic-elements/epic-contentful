@@ -18,6 +18,7 @@
       "baseURL": "src"
     },
     "dependencies": {
+      "rx-dom": "npm:rx-dom@^7.0.3",
       "webcomponentsjs": "bower:webcomponentsjs@^0.7.22"
     },
     "devDependencies": {
