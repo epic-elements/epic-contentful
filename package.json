@@ -2,7 +2,7 @@
   "name": "@mjleitch/epic-contentful",
   "version": "1.0.0",
   "description": "data binding to contentful cms",
-  "main": "index.js",
+  "main": "src/epic-contentful.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
