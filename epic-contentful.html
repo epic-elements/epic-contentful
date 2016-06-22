@@ -1,69 +1,134 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="rx-behaviors.html">
+<!-- <link rel="import" href="../iron-ajax/iron-ajax.html"> -->
+<!-- <link rel="import" href="../epic-rx/epic-rx.html"> -->
 
 <dom-module id="epic-contentful">
 <template>
-    <iron-ajax
-        auto="[[auto]]"
-      url="[[url]]"
-      handle-as="json"
-      last-response="{{response}}"
-      debounce-duration="300"></iron-ajax>
-    <content></content>
 </template>
 <script>
 (function() {
   'use strict';
   class EpicContentful {
+
+    // Define behaviors with a getter.
+//     get behaviors() {
+//       return [EpicBehaviors.RxObservables];
+//     }
+
     beforeRegister() {
       this.is = 'epic-contentful';
-      this.properties = {
-          token: {
+      this.proxyToken = {
               type: String,
-              notify: true,
-              value: ''
+              notify: true
+          };
+      this.properties = {
+        token: new Proxy(this.proxyToken, {
+          get (target, key) {
+            console.info(`Get on property "${key}"`)
+            return target[key]
           },
+          set (target, key) {
+            console.info(`set on property "${key}"`)
+            return target[key]
+          }
+        }),
           space: {
               type: String,
               notify: true,
-              value: ''
           },
           contentType:{
               type: String,
               notify: true,
-              value: ''
+              observer: 'observeThis'
           },
           resourceType:{
               type: String,
               notify: true,
               value: 'entries'
           },
-          auto: {
-              type: Boolean,
-              notify: true,
-              value: true
-          },
           limit: {
             type: Number,
             notify: true,
-            value: 100
-        },
-        response: {
-            notify: true
-        },
-          url: {
-              type: String,
-              notify: true,
-              computed: '_computeUrl(token, space, resourceType, contentType, limit)'
-          }
+            value: 100,
+        }
+        
       };
+      
+      
     }
-    // Define other lifecycle methods as you need.
 
-    _computeUrl(token, space, resourceType, contentType, limit) {
-        let url = `https://cdn.contentful.com/spaces/${space}/${resourceType}?access_token=${token}&content_type=${contentType}&limit=${limit}`;
-        console.log(url);
-        return url;
+    _log(log){
+      console.log(log)
+    }
+
+    observeThis(value){
+      console.log(value)
+    }
+
+
+    registered(){
+      
+      
+
+//       this.tokenStream = Rx.DOM.fromEvent(this, 'token-changed');
+//       this.spaceStream = Rx.DOM.fromEvent(this, 'space-changed');
+//       this.contentTypeStream = Rx.DOM.fromEvent(this, 'content-type-changed');
+//       this.resourceTypeStream = Rx.DOM.fromEvent(this, 'resource-type-changed');
+//       baseURLStream.subscribe(this.sendRequest.bind(this));
+
+
+    }
+    created(){
+
+  
+//       this.tokenStream.subscribe(x=>console.log(x));
+//       this.spaceStream.subscribe(x=>console.log(x));
+//       this.contentTypeStream.subscribe(x=>console.log(x));
+//       this.resourceTypeStream.subscribe(x=>console.log(x));
+
+//       let baseURLStream = this.computeBaseURL(spaceStream, resourceTypeStream, tokenStream);
+//       baseURLStream.subscribe(x=>console.log(x));
+    }
+    ready(){
+      console.log(this.token);
+//       this.propertyObserver.subscribe(x=>console.log('subject', x));
+
+//       this.tokenStream.subscribe(x=>console.log(x));
+//       this.spaceStream.subscribe(x=>console.log(x));
+//       this.contentTypeStream.subscribe(x=>console.log(x));
+//       this.resourceTypeStream.subscribe(x=>console.log(x));
+
+
+
+
+
+    }
+
+    // Define other lifecycle methods as you need.
+    computeBaseURL(spaceStream, resourceTypeStream, tokenStream) {
+        let spaceStreamFiltered = spaceStream.filter(x=>x);
+        let resourceTypeStreamFiltered = resourceTypeStream.filter(x=>x);
+        let tokenStreamFiltered = tokenStream.filter(x=>x);
+
+        return Rx.Observable.combineLatest(spaceStreamFiltered, resourceTypeStreamFiltered, tokenStreamFiltered)
+          .map(x=>`https://cdn.contentful.com/spaces/${x[0]}/${x[1]}?access_token=${x[2]}`).distinctUntilChanged();
+    }
+
+    // Makes a request to contentful
+    sendRequest(event){
+        Rx.DOM.ajax({url: event.detail.value,responseType: 'json'})
+            .subscribe(x=>{
+              console.log(x);
+              this.response = x.response;
+              this.fire('response', {response: x.response});
+            });
+        // Rx.DOM.ajax({url: url,responseType: 'json'}).flatMap(x=>x.response.includes.Asset);
+    }
+
+    // Maps includes assets to asset properties
+    mapAssets() {
+
     }
   }
   // Register the element using Polymer's constructor.
