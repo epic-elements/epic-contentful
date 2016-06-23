@@ -1,6 +1,6 @@
 # \<epic-contentful\>
 
-data-binding to contentful cms data
+api for contenful cms
 
 ## Install the Polymer-CLI
 

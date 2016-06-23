@@ -1,138 +1,161 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="rx-behaviors.html">
-<!-- <link rel="import" href="../iron-ajax/iron-ajax.html"> -->
-<!-- <link rel="import" href="../epic-rx/epic-rx.html"> -->
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../epic-rx/epic-rx.html">
+<link rel="import" href="epic-behaviors-observables.html">
+<link rel="import" href="epic-contentful-filter.html">
 
 <dom-module id="epic-contentful">
-<template>
-</template>
-<script>
-(function() {
-  'use strict';
-  class EpicContentful {
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
 
-    // Define behaviors with a getter.
-//     get behaviors() {
-//       return [EpicBehaviors.RxObservables];
-//     }
+    <iron-ajax
+        auto
+        url="[[url]]"
+        handle-as="json"
+        on-response="handleResponse"
+        debounce-duration="300"></iron-ajax>
+        <content id="filters" select="epic-contentful-filter"></content>
+        <content></content>
+  </template>
 
-    beforeRegister() {
-      this.is = 'epic-contentful';
-      this.proxyToken = {
-              type: String,
-              notify: true
-          };
-      this.properties = {
-        token: new Proxy(this.proxyToken, {
-          get (target, key) {
-            console.info(`Get on property "${key}"`)
-            return target[key]
-          },
-          set (target, key) {
-            console.info(`set on property "${key}"`)
-            return target[key]
-          }
-        }),
-          space: {
+  <script>
+  (function() {
+    'use strict';
+
+    class EpicContentful {
+
+        // Define behaviors with a getter.
+        // get behaviors() {
+        //   return [Epic.Behaviors.Observables];
+        // }
+
+      beforeRegister() {
+        this.is = 'epic-contentful';
+
+        this.properties = {
+            token: {
               type: String,
               notify: true,
+              value: ''
+          },
+            space: {
+              type: String,
+              notify: true,
+              value: ''
           },
           contentType:{
               type: String,
               notify: true,
-              observer: 'observeThis'
+              value: ''
+          },
+          contentTypeQueryParam:{
+              type: String,
+              notify: true,
+              value:'',
+              computed: '_computeContentTypeQueryParam(contentType)'
           },
           resourceType:{
               type: String,
               notify: true,
               value: 'entries'
           },
-          limit: {
-            type: Number,
-            notify: true,
-            value: 100,
+          url:{
+              type: String,
+              notify: true,
+              computed: '_computeBaseURL(token,space,resourceType,contentTypeQueryParam, searchQueryString)'
+        },
+          response: {
+              type: Object,
+              notify: true,
+              value: ()=>({}),
+              observer: '_responseChanged'
+          },
+          searchParams: {
+              type: Array,
+              notify: true,
+              value: ()=>[],
+          },
+          searchQueryString: {
+              type: String,
+              notify: true,
+              value: '',
+              computed: '_computesearchQueryParams(searchParams, searchParams.*)',
+              observer: '_searchQueryStringChanged'
+          }
+        };
+      }
+
+      _searchQueryStringChanged(value){
+
+      }
+
+      _computesearchQueryParams(searchParams){
+          let uniques = Array.from(new Set(searchParams));
+          return searchParams.reduce((x1,x2)=>`${x1}${x2}`,'');
+      }
+
+      _responseChanged(newValue, oldValue){
+          this.fire('response', event.detail.response);
+      }
+
+      _computeContentTypeQueryParam(contentType){
+          if (contentType){
+              return `&content_type=${contentType}`;
+          }
+          return '';
+      }
+
+      _computeBaseURL(token,space,resourceType,contentTypeQueryParam,searchQueryString) {
+          if(!token || !space || !resourceType)
+            return '';
+
+            return `https://cdn.contentful.com/spaces/${space}/${resourceType}?access_token=${token}${contentTypeQueryParam}${searchQueryString}`
         }
-        
-      };
-      
-      
-    }
-
-    _log(log){
-      console.log(log)
-    }
-
-    observeThis(value){
-      console.log(value)
-    }
 
 
-    registered(){
-      
-      
+      created(){
 
-//       this.tokenStream = Rx.DOM.fromEvent(this, 'token-changed');
-//       this.spaceStream = Rx.DOM.fromEvent(this, 'space-changed');
-//       this.contentTypeStream = Rx.DOM.fromEvent(this, 'content-type-changed');
-//       this.resourceTypeStream = Rx.DOM.fromEvent(this, 'resource-type-changed');
-//       baseURLStream.subscribe(this.sendRequest.bind(this));
+      }
+      registered(){}
+      ready(){
+          this._handleFilterChanges(this.$.filters);
+      }
 
+      _handleFilterChanges(element){
+          var filterStream = new Rx.BehaviorSubject('');
 
-    }
-    created(){
+          Polymer.dom(element).observeNodes(((changes)=>{
+              filterStream.onNext(this.getContentChildren('#filters'));
+          }).bind(this));
 
-  
-//       this.tokenStream.subscribe(x=>console.log(x));
-//       this.spaceStream.subscribe(x=>console.log(x));
-//       this.contentTypeStream.subscribe(x=>console.log(x));
-//       this.resourceTypeStream.subscribe(x=>console.log(x));
+          Rx.Observable.from(this.getContentChildren('#filters'))
+            .flatMap(x=>Rx.DOM.fromEvent(x, 'query-param-changed'))
+            .subscribe(x=>filterStream.onNext(this.getContentChildren('#filters')));
+        //   this._domObservable(this.$.filters);
+        filterStream
+            .filter(x=>x)
+            .do(x=>this.searchParams = [])
+            .flatMap(x=>x)
+            .map(x=>x.queryParam)
+            .filter(x=>x)
+            .subscribe(x=>this.push('searchParams',x));
+      }
 
-//       let baseURLStream = this.computeBaseURL(spaceStream, resourceTypeStream, tokenStream);
-//       baseURLStream.subscribe(x=>console.log(x));
-    }
-    ready(){
-      console.log(this.token);
-//       this.propertyObserver.subscribe(x=>console.log('subject', x));
+      getPropertiesFromElement(elements, property){
+          return Rx.Observable.from(elements).map(x=>x[property]).filter(x=>x);
+      }
 
-//       this.tokenStream.subscribe(x=>console.log(x));
-//       this.spaceStream.subscribe(x=>console.log(x));
-//       this.contentTypeStream.subscribe(x=>console.log(x));
-//       this.resourceTypeStream.subscribe(x=>console.log(x));
-
-
-
-
+      handleResponse(event){
+          this.response = event.detail.response;
+      }
 
     }
-
-    // Define other lifecycle methods as you need.
-    computeBaseURL(spaceStream, resourceTypeStream, tokenStream) {
-        let spaceStreamFiltered = spaceStream.filter(x=>x);
-        let resourceTypeStreamFiltered = resourceTypeStream.filter(x=>x);
-        let tokenStreamFiltered = tokenStream.filter(x=>x);
-
-        return Rx.Observable.combineLatest(spaceStreamFiltered, resourceTypeStreamFiltered, tokenStreamFiltered)
-          .map(x=>`https://cdn.contentful.com/spaces/${x[0]}/${x[1]}?access_token=${x[2]}`).distinctUntilChanged();
-    }
-
-    // Makes a request to contentful
-    sendRequest(event){
-        Rx.DOM.ajax({url: event.detail.value,responseType: 'json'})
-            .subscribe(x=>{
-              console.log(x);
-              this.response = x.response;
-              this.fire('response', {response: x.response});
-            });
-        // Rx.DOM.ajax({url: url,responseType: 'json'}).flatMap(x=>x.response.includes.Asset);
-    }
-
-    // Maps includes assets to asset properties
-    mapAssets() {
-
-    }
-  }
-  // Register the element using Polymer's constructor.
-  Polymer(EpicContentful);
-})();
-</script>
+    // Register the element using Polymer's constructor.
+    Polymer(EpicContentful);
+  })();
+  </script>
 </dom-module>
