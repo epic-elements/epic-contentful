@@ -99,7 +99,7 @@
       }
 
       _responseChanged(newValue, oldValue){
-          this.fire('response', event.detail.response);
+          this.fire('response', {value: newValue});
       }
 
       _computeContentTypeQueryParam(contentType){
