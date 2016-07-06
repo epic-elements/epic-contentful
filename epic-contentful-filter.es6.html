@@ -1,0 +1,51 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="epic-element">
+<template>
+    <content></content>
+</template>
+<script>
+(function() {
+  'use strict';
+  class EpicContentfulFilter {
+    beforeRegister() {
+      this.is = 'epic-contentful-filter';
+      this.properties = {
+          property: {
+            type: String,
+            notify:true,
+            value: ''
+        },
+        value: {
+          type: String,
+          notify:true,
+          value: ''
+      },
+      operator: {
+        type: String,
+        notify:true,
+        value: ''
+        },
+        queryParam:{
+            type: String,
+            notify:true,
+            computed:'_computeQueryParam(property,value,operator)',
+            observer: '_queryParamChanged'
+        }
+      };
+      this.observers = [];
+    }
+    _queryParamChanged(value){
+    }
+    _computeQueryParam(property,value,operator){
+        if(!property || !value) {
+            return;
+        }
+        return `&${property}${operator}=${value}`;
+    }
+  }
+  // Register the element using Polymer's constructor.
+  Polymer(EpicContentfulFilter);
+})();
+</script>
+</dom-module>
