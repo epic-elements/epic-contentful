@@ -1,0 +1,161 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../epic-rx/epic-rx.html">
+<link rel="import" href="epic-behaviors-observables.html">
+<link rel="import" href="epic-contentful-filter.html">
+
+<dom-module id="epic-contentful">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <iron-ajax
+        auto
+        url="[[url]]"
+        handle-as="json"
+        on-response="handleResponse"
+        debounce-duration="300"></iron-ajax>
+        <content id="filters" select="epic-contentful-filter"></content>
+        <content></content>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    class EpicContentful {
+
+        // Define behaviors with a getter.
+        // get behaviors() {
+        //   return [Epic.Behaviors.Observables];
+        // }
+
+      beforeRegister() {
+        this.is = 'epic-contentful';
+
+        this.properties = {
+            token: {
+              type: String,
+              notify: true,
+              value: ''
+          },
+            space: {
+              type: String,
+              notify: true,
+              value: ''
+          },
+          contentType:{
+              type: String,
+              notify: true,
+              value: ''
+          },
+          contentTypeQueryParam:{
+              type: String,
+              notify: true,
+              value:'',
+              computed: '_computeContentTypeQueryParam(contentType)'
+          },
+          resourceType:{
+              type: String,
+              notify: true,
+              value: 'entries'
+          },
+          url:{
+              type: String,
+              notify: true,
+              computed: '_computeBaseURL(token,space,resourceType,contentTypeQueryParam, searchQueryString)'
+        },
+          response: {
+              type: Object,
+              notify: true,
+              value: ()=>({}),
+              observer: '_responseChanged'
+          },
+          searchParams: {
+              type: Array,
+              notify: true,
+              value: ()=>[],
+          },
+          searchQueryString: {
+              type: String,
+              notify: true,
+              value: '',
+              computed: '_computesearchQueryParams(searchParams, searchParams.*)',
+              observer: '_searchQueryStringChanged'
+          }
+        };
+      }
+
+      _searchQueryStringChanged(value){
+
+      }
+
+      _computesearchQueryParams(searchParams){
+          let uniques = Array.from(new Set(searchParams));
+          return searchParams.reduce((x1,x2)=>`${x1}${x2}`,'');
+      }
+
+      _responseChanged(newValue, oldValue){
+          this.fire('response', {value: newValue});
+      }
+
+      _computeContentTypeQueryParam(contentType){
+          if (contentType){
+              return `&content_type=${contentType}`;
+          }
+          return '';
+      }
+
+      _computeBaseURL(token,space,resourceType,contentTypeQueryParam,searchQueryString) {
+          if(!token || !space || !resourceType)
+            return '';
+
+            return `https://cdn.contentful.com/spaces/${space}/${resourceType}?access_token=${token}${contentTypeQueryParam}${searchQueryString}`
+        }
+
+
+      created(){
+
+      }
+      registered(){}
+      ready(){
+          this._handleFilterChanges(this.$.filters);
+      }
+
+      _handleFilterChanges(element){
+          var filterStream = new Rx.BehaviorSubject('');
+
+          Polymer.dom(element).observeNodes(((changes)=>{
+              filterStream.onNext(this.getContentChildren('#filters'));
+          }).bind(this));
+
+          Rx.Observable.from(this.getContentChildren('#filters'))
+            .flatMap(x=>Rx.DOM.fromEvent(x, 'query-param-changed'))
+            .subscribe(x=>filterStream.onNext(this.getContentChildren('#filters')));
+        //   this._domObservable(this.$.filters);
+        filterStream
+            .filter(x=>x)
+            .do(x=>this.searchParams = [])
+            .flatMap(x=>x)
+            .map(x=>x.queryParam)
+            .filter(x=>x)
+            .subscribe(x=>this.push('searchParams',x));
+      }
+
+      getPropertiesFromElement(elements, property){
+          return Rx.Observable.from(elements).map(x=>x[property]).filter(x=>x);
+      }
+
+      handleResponse(event){
+          this.response = event.detail.response;
+      }
+
+    }
+    // Register the element using Polymer's constructor.
+    Polymer(EpicContentful);
+  })();
+  </script>
+</dom-module>
