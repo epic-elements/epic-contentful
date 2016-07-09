@@ -1,7 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-ajax/iron-ajax.html">
-<link rel="import" href="../epic-rx/epic-rx.html">
-<link rel="import" href="epic-behaviors-observables.html">
+<link rel="import" href="contentful.html">
 <link rel="import" href="epic-contentful-filter.html">
 
 <dom-module id="epic-contentful">
@@ -28,11 +26,6 @@
 
     class EpicContentful {
 
-        // Define behaviors with a getter.
-        // get behaviors() {
-        //   return [Epic.Behaviors.Observables];
-        // }
-
       beforeRegister() {
         this.is = 'epic-contentful';
 
@@ -40,17 +33,42 @@
             token: {
               type: String,
               notify: true,
-              value: ''
+              value: '',
+              observer: '_tokenChanged'
           },
             space: {
               type: String,
               notify: true,
-              value: ''
+              value: '',
+              observer: '_spaceChanged'
+          },
+          client:{
+            type:Object,
+            notify: true,
+            computed: '_computeClient(token, space)'
+          },
+          entryId: {
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_entryIdChanged'
+          },
+          entry: {
+              type: Object,
+              notify: true,
+              value: ()=>({}),
+              observer: '_entryChanged'
           },
           contentType:{
               type: String,
               notify: true,
-              value: ''
+              value: '',
+              observer: '_contentTypeChanged'
+          },
+          contentTypeSchema:{
+              type: Object,
+              notify: true,
+              observer: '_contentTypeSchemaChanged'
           },
           contentTypeQueryParam:{
               type: String,
@@ -87,6 +105,69 @@
               observer: '_searchQueryStringChanged'
           }
         };
+
+        this.observers = [
+            '_getSingleEntry(client, entryId)',
+            '_getContentTypeSchema(client, contentType)',
+        ];
+      }
+
+      // Property Observer Methods
+
+        _tokenChanged(token){
+            console.log('_tokenChanged', token);
+        }
+        _spaceChanged(space){
+            console.log('_spaceChanged', space);
+        }
+        _entryIdChanged(entryId){
+            console.log('_entryIdChanged', entryId);
+        }
+        _entryChanged(entry){
+            console.log('_entryChanged', entry);
+        }
+        _contentTypeChanged(contentType){
+            console.log('_contentTypeChanged', contentType);
+        }
+        _contentTypeSchemaChanged(contentTypeSchema){
+            console.log('_contentTypeSchemaChanged', contentTypeSchema);
+        }
+
+        _getSingleEntry(client, entryId){
+            if(!client || Object.keys(client).length < 1 || !entryId){
+                this.entry = {};
+            } else {
+                this.debounce('getEntry', ()=>{
+                    client.getEntry(entryId)
+                        .then(((entry) => this.entry = entry || {}).bind(this));
+                })
+
+            }
+        }
+
+        _getContentTypeSchema(client, contentType){
+            if(!client || Object.keys(client).length < 1 || !contentType){
+                this.contentTypeSchema = {};
+            } else {
+                this.debounce('getContentType', ()=>{
+                    client.getContentType(contentType)
+                        .then(((contentTypeSchema)=>this.contentTypeSchema = contentTypeSchema || {}).bind(this))
+                });
+            }
+        }
+
+      // Computed Property Methods
+
+      _computeClient(token, space){
+          if(!token || !space){
+              return {};
+          } else {
+              return contentful.createClient({
+                  space: space,
+                  accessToken: token
+                })
+          }
+
       }
 
       _searchQueryStringChanged(value){
@@ -116,42 +197,12 @@
             return `https://cdn.contentful.com/spaces/${space}/${resourceType}?access_token=${token}${contentTypeQueryParam}${searchQueryString}`
         }
 
-
-      created(){
-
-      }
+    // Lifecycle callbacks
+      created(){}
       registered(){}
-      ready(){
-          this._handleFilterChanges(this.$.filters);
-      }
-
-      _handleFilterChanges(element){
-          var filterStream = new Rx.BehaviorSubject('');
-
-          Polymer.dom(element).observeNodes(((changes)=>{
-              filterStream.onNext(this.getContentChildren('#filters'));
-          }).bind(this));
-
-          Rx.Observable.from(this.getContentChildren('#filters'))
-            .flatMap(x=>Rx.DOM.fromEvent(x, 'query-param-changed'))
-            .subscribe(x=>filterStream.onNext(this.getContentChildren('#filters')));
-        //   this._domObservable(this.$.filters);
-        filterStream
-            .filter(x=>x)
-            .do(x=>this.searchParams = [])
-            .flatMap(x=>x)
-            .map(x=>x.queryParam)
-            .filter(x=>x)
-            .subscribe(x=>this.push('searchParams',x));
-      }
-
-      getPropertiesFromElement(elements, property){
-          return Rx.Observable.from(elements).map(x=>x[property]).filter(x=>x);
-      }
-
-      handleResponse(event){
-          this.response = event.detail.response;
-      }
+      ready(){}
+      attached(){}
+      attributeChanged(){}
 
     }
     // Register the element using Polymer's constructor.

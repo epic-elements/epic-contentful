@@ -4,7 +4,9 @@
   "main": "epic-contentful.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "epic-rx": "https://github.com/epic-elements/epic-rx.git"
+    "epic-rx": "https://github.com/epic-elements/epic-rx.git",
+    "contentful.min": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.min.js",
+    "contentful": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.js"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
