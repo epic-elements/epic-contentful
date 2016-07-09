@@ -7,7 +7,9 @@
     "epic-rx": "https://github.com/epic-elements/epic-rx.git",
     "contentful.min": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.min.js",
     "contentful": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.js",
-    "epic-polyfills": "epic-elements/epic-polyfills"
+    "epic-polyfills": "epic-elements/epic-polyfills",
+    "polyfill": "https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.9.1/polyfill.js",
+    "babel-polyfill": "https://github.com/babel/babel/tree/master/packages/babel-polyfill"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

@@ -9,7 +9,7 @@
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
 
-    <link rel="import" href="../epic-contentful.es6.html">
+    <link rel="import" href="../epic-contentful.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
@@ -18,40 +18,30 @@
 
     <div class="vertical-section-container centered">
       <h3>Basic epic-contentful Demo</h3>
-      <demo-snippet>
-        <template>
-            <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
+
+            <!-- <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
                              space="1kzutnf7jc3r"
                              entry-id="51N8w7az8A46WKY4OM64AW"
-                             entry="{{entry}}"></epic-contentful>
-        </template>
-      </demo-snippet>
+                             content-type="videoCard"
+                             mode="entries"
+                             entries="{{entries}}"></epic-contentful> -->
+
+
 
       <h3>Basic epic-contentful Demo</h3>
-      <demo-snippet>
-        <template>
+
+            <template is="dom-bind">
             <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
                              space="1kzutnf7jc3r"
                              entries="{{entries}}"
-                             content-type="videoCard"
+                             content-type="ambassadors"
                              mode="entries">
-                             <epic-contentful-params property="fields.title"
-                                                     value="The Road To Woodward (Episode 2)"></epic-contentful-params>
             </epic-contentful>
-          <!-- <div>[[entry.fields.title]]</div> -->
-        </template>
-      </demo-snippet>
+            <template is="dom-repeat" items="[[entries.items]]">
+                <div>[[item.fields.slug]]</div>
+            </template>
+            </template>
 
-      <h3>Basic epic-contentful Demo</h3>
-      <demo-snippet>
-        <template>
-            <!-- <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
-                             space="1kzutnf7jc3r"
-                             entry="{{entry}}">
-              <epic-contentful-filter property="fields.slug" value="dcp"></epic-contentful-filter></epic-contentful>
-          <div>[[entry.fields.title]]</div> -->
-        </template>
-      </demo-snippet>
     </div>
 
   </body>

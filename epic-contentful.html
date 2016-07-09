@@ -1,204 +1,173 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-ajax/iron-ajax.html">
-<link rel="import" href="../epic-rx/epic-rx.html">
-<link rel="import" href="epic-behaviors-observables.html">
-<link rel="import" href="epic-contentful-filter.html">
+<link rel="import" href="../epic-polyfills/epic-polyfills.html">
+<link rel="import" href="contentful.html">
+<link rel="import" href="epic-contentful-params.html">
 
 <dom-module id="epic-contentful">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-
-    <iron-ajax
-        auto
-        url="[[url]]"
-        handle-as="json"
-        on-response="handleResponse"
-        debounce-duration="300"></iron-ajax>
-        <content id="filters" select="epic-contentful-filter"></content>
+        <content id="params" select="epic-contentful-params"></content>
         <content></content>
   </template>
 
   <script>
-  'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-(function () {
+  (function() {
     'use strict';
 
-    var EpicContentful = function () {
-        function EpicContentful() {
-            _classCallCheck(this, EpicContentful);
+    class EpicContentful {
+
+      beforeRegister() {
+        this.is = 'epic-contentful';
+
+        this.properties = {
+            token: {
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_tokenChanged'
+          },
+            space: {
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_spaceChanged'
+          },
+          host:{
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_hostChanged'
+          },
+          client:{
+            type:Object,
+            notify: true,
+            computed: '_computeClient(token, space)'
+          },
+          entryId: {
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_entryIdChanged'
+          },
+          entry: {
+              type: Object,
+              notify: true,
+              observer: '_entryChanged'
+          },
+          entries: {
+            type: Array,
+            notify: true,
+            value:()=>({}),
+            observer: '_entriesChanged'
+          },
+          contentType:{
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_contentTypeChanged'
+          },
+          contentTypeSchema:{
+              type: Object,
+              notify: true,
+              observer: '_contentTypeSchemaChanged'
+          },
+          mode:{
+              type: String,
+              notify: true,
+              value: 'entries'
+          },
+        searchParamNodes:{
+                type: Array,
+                notify: true,
+                observer: '_searchParamNodesChanged'
+        },
+          searchParams: {
+              type: Object,
+              notify: true,
+              computed: '_computeSearchParams(contentType, searchParamNodes)',
+              observer: '_searchParamsChanged'
+          }
+        };
+
+        this.observers = [
+            '_getSingleEntry(client, entryId, mode)',
+            '_getContentTypeSchema(client, contentType, mode)',
+            '_getEntries(client, searchParams, mode)',
+        ];
+      }
+
+      // Property Observer Methods
+
+        _getSingleEntry(client, entryId, mode){
+            if(!client || Object.keys(client).length < 1 || !entryId || mode !== 'entry'){
+                this.entry = {};
+            } else {
+                this.debounce('getEntry', ()=>{
+                    client.getEntry(entryId)
+                        .then(((entry) => this.entry = entry || {}).bind(this));
+                })
+
+            }
         }
 
-        _createClass(EpicContentful, [{
-            key: 'beforeRegister',
-
-
-            // Define behaviors with a getter.
-            // get behaviors() {
-            //   return [Epic.Behaviors.Observables];
-            // }
-
-            value: function beforeRegister() {
-                this.is = 'epic-contentful';
-
-                this.properties = {
-                    token: {
-                        type: String,
-                        notify: true,
-                        value: ''
-                    },
-                    space: {
-                        type: String,
-                        notify: true,
-                        value: ''
-                    },
-                    contentType: {
-                        type: String,
-                        notify: true,
-                        value: ''
-                    },
-                    contentTypeQueryParam: {
-                        type: String,
-                        notify: true,
-                        value: '',
-                        computed: '_computeContentTypeQueryParam(contentType)'
-                    },
-                    resourceType: {
-                        type: String,
-                        notify: true,
-                        value: 'entries'
-                    },
-                    url: {
-                        type: String,
-                        notify: true,
-                        computed: '_computeBaseURL(token,space,resourceType,contentTypeQueryParam, searchQueryString)'
-                    },
-                    response: {
-                        type: Object,
-                        notify: true,
-                        value: function value() {
-                            return {};
-                        },
-                        observer: '_responseChanged'
-                    },
-                    searchParams: {
-                        type: Array,
-                        notify: true,
-                        value: function value() {
-                            return [];
-                        }
-                    },
-                    searchQueryString: {
-                        type: String,
-                        notify: true,
-                        value: '',
-                        computed: '_computesearchQueryParams(searchParams, searchParams.*)',
-                        observer: '_searchQueryStringChanged'
-                    }
-                };
-            }
-        }, {
-            key: '_searchQueryStringChanged',
-            value: function _searchQueryStringChanged(value) {}
-        }, {
-            key: '_computesearchQueryParams',
-            value: function _computesearchQueryParams(searchParams) {
-                var uniques = Array.from(new Set(searchParams));
-                return searchParams.reduce(function (x1, x2) {
-                    return '' + x1 + x2;
-                }, '');
-            }
-        }, {
-            key: '_responseChanged',
-            value: function _responseChanged(newValue, oldValue) {
-                this.fire('response', { value: newValue });
-            }
-        }, {
-            key: '_computeContentTypeQueryParam',
-            value: function _computeContentTypeQueryParam(contentType) {
-                if (contentType) {
-                    return '&content_type=' + contentType;
+        _getEntries(client, searchParams, mode){
+            this.debounce('getEntries', ()=>{
+                if(client && Object.keys(client).length > 0 && searchParams && Object.keys(searchParams).length > 0 && mode === 'entries'){
+                    client.getEntries(searchParams)
+                        .then((entries => this.entries = entries).bind(this));
                 }
-                return '';
-            }
-        }, {
-            key: '_computeBaseURL',
-            value: function _computeBaseURL(token, space, resourceType, contentTypeQueryParam, searchQueryString) {
-                if (!token || !space || !resourceType) return '';
+            });
+        }
 
-                return 'https://cdn.contentful.com/spaces/' + space + '/' + resourceType + '?access_token=' + token + contentTypeQueryParam + searchQueryString;
-            }
-        }, {
-            key: 'created',
-            value: function created() {}
-        }, {
-            key: 'registered',
-            value: function registered() {}
-        }, {
-            key: 'ready',
-            value: function ready() {
-                this._handleFilterChanges(this.$.filters);
-            }
-        }, {
-            key: '_handleFilterChanges',
-            value: function _handleFilterChanges(element) {
-                var _this = this;
-
-                var filterStream = new Rx.BehaviorSubject('');
-
-                Polymer.dom(element).observeNodes(function (changes) {
-                    filterStream.onNext(_this.getContentChildren('#filters'));
-                }.bind(this));
-
-                Rx.Observable.from(this.getContentChildren('#filters')).flatMap(function (x) {
-                    return Rx.DOM.fromEvent(x, 'query-param-changed');
-                }).subscribe(function (x) {
-                    return filterStream.onNext(_this.getContentChildren('#filters'));
-                });
-                //   this._domObservable(this.$.filters);
-                filterStream.filter(function (x) {
-                    return x;
-                }).do(function (x) {
-                    return _this.searchParams = [];
-                }).flatMap(function (x) {
-                    return x;
-                }).map(function (x) {
-                    return x.queryParam;
-                }).filter(function (x) {
-                    return x;
-                }).subscribe(function (x) {
-                    return _this.push('searchParams', x);
+        _getContentTypeSchema(client, contentType, mode){
+            console.log(client, contentType, mode);
+            if(!client || Object.keys(client).length < 1 || !contentType || mode !== 'contentType'){
+                this.contentTypeSchema = {};
+            } else {
+                this.debounce('getContentType', ()=>{
+                    client.getContentType(contentType)
+                        .then(((contentTypeSchema)=>this.contentTypeSchema = contentTypeSchema || {}).bind(this))
                 });
             }
-        }, {
-            key: 'getPropertiesFromElement',
-            value: function getPropertiesFromElement(elements, property) {
-                return Rx.Observable.from(elements).map(function (x) {
-                    return x[property];
-                }).filter(function (x) {
-                    return x;
-                });
-            }
-        }, {
-            key: 'handleResponse',
-            value: function handleResponse(event) {
-                this.response = event.detail.response;
-            }
-        }]);
+        }
 
-        return EpicContentful;
-    }();
+      // Computed Property Methods
+
+      _computeClient(token, space){
+          console.log(token, space);
+          if(!token || !space){
+              return {};
+          } else {
+              return contentful.createClient({
+                  space: space,
+                  accessToken: token
+                })
+          }
+      }
+
+      _computeSearchParams(contentType, searchParamNodes){
+              console.log(contentType, searchParamNodes);
+              if(!contentType){
+                  return;
+              } else if(!contentType && (!searchParamNodes || searchParamNodes.length < 1)){
+                  return;
+              } else if (contentType && (!searchParamNodes || searchParamNodes.length < 1)){
+                  return {content_type: contentType};
+              } else {
+                  return searchParamNodes.reduce((previous, current)=>{
+                      let obj = {};
+                      obj[current.property] = current.value;
+                      return Object.assign({}, previous, obj);
+                  }, {content_type: contentType});
+              }
+      }
+
+    // Lifecycle callbacks
+      attached(){
+         this.searchParamNodes = this.getContentChildren('#params');
+      }
+    }
     // Register the element using Polymer's constructor.
-
-
     Polymer(EpicContentful);
-})();  </script>
+  })();
+  </script>
 </dom-module>
