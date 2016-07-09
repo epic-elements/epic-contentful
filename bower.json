@@ -6,7 +6,8 @@
     "polymer": "Polymer/polymer#^1.4.0",
     "epic-rx": "https://github.com/epic-elements/epic-rx.git",
     "contentful.min": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.min.js",
-    "contentful": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.js"
+    "contentful": "https://npmcdn.com/contentful@3.0.0/browser-dist/contentful.js",
+    "epic-polyfills": "epic-elements/epic-polyfills"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

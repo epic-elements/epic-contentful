@@ -1,22 +1,11 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../epic-polyfills/epic-polyfills.html">
 <link rel="import" href="contentful.html">
-<link rel="import" href="epic-contentful-filter.html">
+<link rel="import" href="epic-contentful-params.es6.html">
 
 <dom-module id="epic-contentful">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-
-    <iron-ajax
-        auto
-        url="[[url]]"
-        handle-as="json"
-        on-response="handleResponse"
-        debounce-duration="300"></iron-ajax>
-        <content id="filters" select="epic-contentful-filter"></content>
+        <content id="params" select="epic-contentful-params"></content>
         <content></content>
   </template>
 
@@ -42,6 +31,12 @@
               value: '',
               observer: '_spaceChanged'
           },
+          host:{
+              type: String,
+              notify: true,
+              value: '',
+              observer: '_hostChanged'
+          },
           client:{
             type:Object,
             notify: true,
@@ -59,6 +54,12 @@
               value: ()=>({}),
               observer: '_entryChanged'
           },
+          entries: {
+            type: Array,
+            notify: true,
+            value:()=>({}),
+            observer: '_entriesChanged'
+          },
           contentType:{
               type: String,
               notify: true,
@@ -70,45 +71,29 @@
               notify: true,
               observer: '_contentTypeSchemaChanged'
           },
-          contentTypeQueryParam:{
-              type: String,
-              notify: true,
-              value:'',
-              computed: '_computeContentTypeQueryParam(contentType)'
-          },
-          resourceType:{
+          mode:{
               type: String,
               notify: true,
               value: 'entries'
           },
-          url:{
-              type: String,
-              notify: true,
-              computed: '_computeBaseURL(token,space,resourceType,contentTypeQueryParam, searchQueryString)'
+        searchParamNodes:{
+                type: Array,
+                notify: true,
+                value:()=>[],
+                observer: '_searchParamNodesChanged'
         },
-          response: {
+          searchParams: {
               type: Object,
               notify: true,
-              value: ()=>({}),
-              observer: '_responseChanged'
-          },
-          searchParams: {
-              type: Array,
-              notify: true,
-              value: ()=>[],
-          },
-          searchQueryString: {
-              type: String,
-              notify: true,
-              value: '',
-              computed: '_computesearchQueryParams(searchParams, searchParams.*)',
-              observer: '_searchQueryStringChanged'
+              computed: '_computeSearchParams(contentType, searchParamNodes)',
+              observer: '_searchParamsChanged'
           }
         };
 
         this.observers = [
-            '_getSingleEntry(client, entryId)',
-            '_getContentTypeSchema(client, contentType)',
+            '_getSingleEntry(client, entryId, mode)',
+            '_getContentTypeSchema(client, contentType, mode)',
+            '_getEntries(client, searchParams, mode)',
         ];
       }
 
@@ -126,6 +111,11 @@
         _entryChanged(entry){
             console.log('_entryChanged', entry);
         }
+
+        _entriesChanged(entries){
+            console.log('_entries', entries);
+        }
+
         _contentTypeChanged(contentType){
             console.log('_contentTypeChanged', contentType);
         }
@@ -133,8 +123,18 @@
             console.log('_contentTypeSchemaChanged', contentTypeSchema);
         }
 
-        _getSingleEntry(client, entryId){
-            if(!client || Object.keys(client).length < 1 || !entryId){
+        _searchParamNodesChanged(searchParamNodes){
+            console.log('_searchParamNodesChanged');
+            console.log(searchParamNodes);
+        }
+
+        _searchParamsChanged(searchParams){
+            console.log('_searchParamsChanged');
+            console.log(searchParams);
+        }
+
+        _getSingleEntry(client, entryId, mode){
+            if(!client || Object.keys(client).length < 1 || !entryId || mode !== 'entry'){
                 this.entry = {};
             } else {
                 this.debounce('getEntry', ()=>{
@@ -145,8 +145,19 @@
             }
         }
 
-        _getContentTypeSchema(client, contentType){
-            if(!client || Object.keys(client).length < 1 || !contentType){
+        _getEntries(client, searchParams, mode){
+            if(!client || Object.keys(client).length < 1 || !searchParams || Object.keys(searchParams).length < 1 || mode !== 'entries'){
+                this.entries = {};
+            } else {
+                this.debounce('getEntries', ()=>{
+                    client.getEntries(searchParams)
+                        .then((entries => this.entries = entries || {}).bind(this));
+                });
+            }
+        }
+
+        _getContentTypeSchema(client, contentType, mode){
+            if(!client || Object.keys(client).length < 1 || !contentType || mode !== 'contentType'){
                 this.contentTypeSchema = {};
             } else {
                 this.debounce('getContentType', ()=>{
@@ -167,41 +178,31 @@
                   accessToken: token
                 })
           }
-
       }
 
-      _searchQueryStringChanged(value){
-
-      }
-
-      _computesearchQueryParams(searchParams){
-          let uniques = Array.from(new Set(searchParams));
-          return searchParams.reduce((x1,x2)=>`${x1}${x2}`,'');
-      }
-
-      _responseChanged(newValue, oldValue){
-          this.fire('response', {value: newValue});
-      }
-
-      _computeContentTypeQueryParam(contentType){
-          if (contentType){
-              return `&content_type=${contentType}`;
+      _computeSearchParams(contentType, searchParamNodes){
+          if(!contentType){
+              return {};
+          } else if(!contentType && (!searchParamNodes || searchParamNodes.length < 1)){
+              return {};
+          } else if (contentType && (!searchParamNodes || searchParamNodes.length < 1)){
+              return {content_type: contentType};
+          } else {
+              return searchParamNodes.reduce((previous, current)=>{
+                  let obj = {};
+                  obj[current.property] = current.value;
+                  return Object.assign({}, previous, obj);
+              }, {content_type: contentType});
           }
-          return '';
       }
-
-      _computeBaseURL(token,space,resourceType,contentTypeQueryParam,searchQueryString) {
-          if(!token || !space || !resourceType)
-            return '';
-
-            return `https://cdn.contentful.com/spaces/${space}/${resourceType}?access_token=${token}${contentTypeQueryParam}${searchQueryString}`
-        }
 
     // Lifecycle callbacks
       created(){}
       registered(){}
       ready(){}
-      attached(){}
+      attached(){
+         this.searchParamNodes = this.getContentChildren('#params');
+      }
       attributeChanged(){}
 
     }
