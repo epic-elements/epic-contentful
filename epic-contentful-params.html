@@ -1,37 +1,52 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../epic-polyfills/epic-polyfills.html">
 
 <dom-module id="epic-contentful-params">
-<template>
+  <template>
     <content></content>
-</template>
-<script>
-(function() {
-  'use strict';
-  class EpicContentfulParams {
-    beforeRegister() {
-      this.is = 'epic-contentful-params';
-      this.properties = {
-          property: {
-            type: String,
-            notify:true,
-            value: ''
-        },
-        value: {
-          type: String,
-          notify:true,
-          value: ''
-      },
-      operator: {
-        type: String,
-        notify:true,
-        reflectToAttribute: true,
-        value: ''
+  </template>
+  <script>
+    (function() {
+      'use strict';
+      class EpicContentfulParams {
+        beforeRegister() {
+          this.is = 'epic-contentful-params';
+          this.properties = {
+            property: {
+              type: String,
+              notify: true,
+              value: ''
+            },
+            value: {
+              type: String,
+              notify: true,
+              value: ''
+            },
+            operator: {
+              type: String,
+              notify: true,
+              value: ''
+            },
+            config: {
+              type: Object,
+              notify: true,
+              computed: '_computeConfig(property, value)'
+            },
+          };
         }
-      };
-    }
-  }
-  // Register the element using Polymer's constructor.
-  Polymer(EpicContentfulParams);
-})();
-</script>
+
+        _computeConfig(property, value){
+            var obj = {};
+            if(!property || !value){
+                return obj;
+            } else {
+                obj[property] = value;
+                return obj;
+            }
+        }
+      }
+      // Register the element using Polymer's constructor.
+      Polymer(EpicContentfulParams);
+    })();
+  </script>
 </dom-module>

@@ -5,169 +5,163 @@
 
 <dom-module id="epic-contentful">
   <template>
-        <content id="params" select="epic-contentful-params"></content>
-        <content></content>
+    <content id="params" select="epic-contentful-params"></content>
+    <content></content>
   </template>
 
   <script>
-  (function() {
-    'use strict';
+    (function() {
+      'use strict';
 
-    class EpicContentful {
+      class EpicContentful {
 
-      beforeRegister() {
-        this.is = 'epic-contentful';
+        beforeRegister() {
+          this.is = 'epic-contentful';
 
-        this.properties = {
+          this.properties = {
             token: {
               type: String,
               notify: true,
               value: '',
-              observer: '_tokenChanged'
-          },
+            },
             space: {
               type: String,
               notify: true,
               value: '',
-              observer: '_spaceChanged'
-          },
-          host:{
+            },
+            host: {
               type: String,
               notify: true,
               value: '',
               observer: '_hostChanged'
-          },
-          client:{
-            type:Object,
-            notify: true,
-            computed: '_computeClient(token, space)'
-          },
-          entryId: {
+            },
+            client: {
+              type: Object,
+              notify: true,
+              computed: '_computeClient(token, space)'
+            },
+            entryId: {
               type: String,
               notify: true,
               value: '',
               observer: '_entryIdChanged'
-          },
-          entry: {
+            },
+            entry: {
               type: Object,
               notify: true,
               observer: '_entryChanged'
-          },
-          entries: {
-            type: Array,
-            notify: true,
-            value:()=>({}),
-            observer: '_entriesChanged'
-          },
-          contentType:{
+            },
+            entries: {
+              type: Array,
+              notify: true,
+              value: () => ({}),
+              observer: '_entriesChanged'
+            },
+            contentType: {
               type: String,
               notify: true,
               value: '',
               observer: '_contentTypeChanged'
-          },
-          contentTypeSchema:{
+            },
+            contentTypeSchema: {
               type: Object,
               notify: true,
               observer: '_contentTypeSchemaChanged'
-          },
-          mode:{
+            },
+            mode: {
               type: String,
               notify: true,
               value: 'entries'
-          },
-        searchParamNodes:{
-                type: Array,
-                notify: true,
-                observer: '_searchParamNodesChanged'
-        },
-          searchParams: {
+            },
+            searchParams: {
               type: Object,
               notify: true,
-              computed: '_computeSearchParams(contentType, searchParamNodes)',
+              value: () => ({}),
               observer: '_searchParamsChanged'
-          }
-        };
-
-        this.observers = [
-            '_getSingleEntry(client, entryId, mode)',
-            '_getContentTypeSchema(client, contentType, mode)',
-            '_getEntries(client, searchParams, mode)',
-        ];
-      }
-
-      // Property Observer Methods
-
-        _getSingleEntry(client, entryId, mode){
-            if(!client || Object.keys(client).length < 1 || !entryId || mode !== 'entry'){
-                this.entry = {};
-            } else {
-                this.debounce('getEntry', ()=>{
-                    client.getEntry(entryId)
-                        .then(((entry) => this.entry = entry || {}).bind(this));
-                })
-
+            },
+            debounceDuration: {
+              type: Number,
+              notify: true,
+              value: '500',
             }
+          };
+
+          this.observers = [
+            // '_getSingleEntry(client, entryId, mode)',
+            // '_getContentTypeSchema(client, contentType, mode)',
+            '_getEntries(client, searchParams.*, mode, debounceDuration)',
+          ];
         }
 
-        _getEntries(client, searchParams, mode){
-            this.debounce('getEntries', ()=>{
-                if(client && Object.keys(client).length > 0 && searchParams && Object.keys(searchParams).length > 0 && mode === 'entries'){
-                    client.getEntries(searchParams)
-                        .then((entries => this.entries = entries).bind(this));
-                }
-            });
-        }
+        // Property Observer Methods
 
-        _getContentTypeSchema(client, contentType, mode){
-            console.log(client, contentType, mode);
-            if(!client || Object.keys(client).length < 1 || !contentType || mode !== 'contentType'){
-                this.contentTypeSchema = {};
-            } else {
-                this.debounce('getContentType', ()=>{
-                    client.getContentType(contentType)
-                        .then(((contentTypeSchema)=>this.contentTypeSchema = contentTypeSchema || {}).bind(this))
-                });
-            }
-        }
-
-      // Computed Property Methods
-
-      _computeClient(token, space){
-          console.log(token, space);
-          if(!token || !space){
-              return {};
+        _getSingleEntry(client, entryId, mode) {
+          if (!client || Object.keys(client).length < 1 || !entryId || mode !== 'entry') {
+            this.entry = {};
           } else {
-              return contentful.createClient({
-                  space: space,
-                  accessToken: token
-                })
+            this.debounce('getEntry', () => {
+              client.getEntry(entryId)
+                .then(((entry) => this.entry = entry || {}).bind(this));
+            })
+
           }
-      }
+        }
 
-      _computeSearchParams(contentType, searchParamNodes){
-              console.log(contentType, searchParamNodes);
-              if(!contentType){
-                  return;
-              } else if(!contentType && (!searchParamNodes || searchParamNodes.length < 1)){
-                  return;
-              } else if (contentType && (!searchParamNodes || searchParamNodes.length < 1)){
-                  return {content_type: contentType};
-              } else {
-                  return searchParamNodes.reduce((previous, current)=>{
-                      let obj = {};
-                      obj[current.property] = current.value;
-                      return Object.assign({}, previous, obj);
-                  }, {content_type: contentType});
-              }
-      }
+        _getEntries(client, searchParams, mode, debounceDuration) {
+          this.debounce('getEntries', () => {
+            if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
+              client.getEntries(searchParams.base)
+                .then((entries => this.entries = entries).bind(this));
+            }
+          }, debounceDuration);
+        }
 
-    // Lifecycle callbacks
-      attached(){
-         this.searchParamNodes = this.getContentChildren('#params');
+        _getContentTypeSchema(client, contentType, mode) {
+          if (!client || Object.keys(client).length < 1 || !contentType) {
+            this.contentTypeSchema = {};
+          } else {
+            this.debounce('getContentType', () => {
+              client.getContentType(contentType)
+                .then(((contentTypeSchema) => this.contentTypeSchema = contentTypeSchema || {}).bind(this))
+            });
+          }
+        }
+
+        // Computed Property Methods
+
+        _computeClient(token, space) {
+          if (!token || !space) {
+            return;
+          } else {
+            return contentful.createClient({
+              space: space,
+              accessToken: token
+            })
+          }
+        }
+
+        _contentTypeChanged(contentType) {
+          this.searchParams = Object.assign({}, this.searchParams, {
+            content_type: contentType
+          });
+        }
+
+        // Event Handlers
+
+        _handleConfigChange(event) {
+          this.searchParams = Object.assign({}, this.searchParams, event.detail.value);
+        }
+
+        // Lifecycle callbacks
+
+        ready() {
+          this.getContentChildren('#params').forEach((node) => {
+            this.listen(node, 'config-changed', '_handleConfigChange');
+          });
+        }
       }
-    }
-    // Register the element using Polymer's constructor.
-    Polymer(EpicContentful);
-  })();
+      // Register the element using Polymer's constructor.
+      Polymer(EpicContentful);
+    })();
   </script>
 </dom-module>
