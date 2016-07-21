@@ -5,8 +5,8 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
     "epic-rx": "https://github.com/epic-elements/epic-rx.git",
-    "contentful.min": "https://npmcdn.com/contentful@latest/browser-dist/contentful.min.js",
-    "contentful": "https://npmcdn.com/contentful@latestbrowser-dist/contentful.js",
+    "contentful.min": "https://npmcdn.com/contentful@3.5.0/browser-dist/contentful.min.js",
+    "contentful": "https://npmcdn.com/contentful@3.5.0/browser-dist/contentful.js",
     "epic-polyfills": "epic-elements/epic-polyfills",
     "polyfill": "https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.9.1/polyfill.js",
     "babel-polyfill": "https://github.com/babel/babel/tree/master/packages/babel-polyfill"
