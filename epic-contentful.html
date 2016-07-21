@@ -32,8 +32,7 @@
             host: {
               type: String,
               notify: true,
-              value: '',
-              observer: '_hostChanged'
+              value: ''
             },
             client: {
               type: Object,
@@ -43,8 +42,7 @@
             entryId: {
               type: String,
               notify: true,
-              value: '',
-              observer: '_entryIdChanged'
+              value: ''
             },
             entry: {
               type: Object,
@@ -54,8 +52,7 @@
             entries: {
               type: Array,
               notify: true,
-              value: () => ({}),
-              observer: '_entriesChanged'
+              value: () => ({})
             },
             contentType: {
               type: String,
@@ -76,8 +73,7 @@
             searchParams: {
               type: Object,
               notify: true,
-              value: () => ({}),
-              observer: '_searchParamsChanged'
+              value: () => ({})
             },
             debounceDuration: {
               type: Number,
