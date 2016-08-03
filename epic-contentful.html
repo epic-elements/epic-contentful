@@ -37,7 +37,7 @@
             client: {
               type: Object,
               notify: true,
-              computed: '_computeClient(token, space)'
+              computed: '_computeClient(disabled, token, space)'
             },
             entryId: {
               type: String,
@@ -79,13 +79,18 @@
               type: Number,
               notify: true,
               value: '500',
+            },
+            disabled: {
+              type: Boolean,
+              notify: true, 
+              value: false
             }
           };
 
           this.observers = [
             // '_getSingleEntry(client, entryId, mode)',
             // '_getContentTypeSchema(client, contentType, mode)',
-            '_getEntries(client, searchParams.*, mode, debounceDuration)',
+            '_getEntries(disabled, client, searchParams.*, mode, debounceDuration)',
           ];
         }
 
@@ -103,13 +108,15 @@
           }
         }
 
-        _getEntries(client, searchParams, mode, debounceDuration) {
-          this.debounce('getEntries', () => {
-            if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
-              client.getEntries(searchParams.base)
-                .then((entries => this.entries = entries).bind(this));
-            }
-          }, debounceDuration);
+        _getEntries(disabled, client, searchParams, mode, debounceDuration) {
+          if (!disabled) {
+            this.debounce('getEntries', () => {
+              if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
+                client.getEntries(searchParams.base)
+                  .then((entries => this.entries = entries).bind(this));
+              }
+            }, debounceDuration);
+          }
         }
 
         _getContentTypeSchema(client, contentType, mode) {
@@ -125,8 +132,8 @@
 
         // Computed Property Methods
 
-        _computeClient(token, space) {
-          if (!token || !space) {
+        _computeClient(disabled, token, space) {
+          if (disabled || !token || !space) {
             return;
           } else {
             return contentful.createClient({
