@@ -4,8 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel epic-contentful.es6.js -o epic-contentful.js && babel epic-contentful-params.es6.js -o epic-contentful-params.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-latest": "^6.22.0"
+  },
+  "babel": {
+    "presets": [
+      "latest"
+    ]
+  }
 }
