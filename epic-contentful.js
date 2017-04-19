@@ -78,6 +78,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               return {};
             }
           },
+          /*
+            Indicates "skip" value passed in contentful query. Helpful for pagination.
+          */
+          skip: {
+            type: Number,
+            notify: true,
+            value: 0 // default for contentful
+          },
+          /*
+            Indicates 'limit' value passed in contentful query. Helpful for pagination.
+          */
+          limit: {
+            type: Number,
+            notify: true,
+            value: 100 // default for contentful
+          },
+          /*
+            Indicates 'order' value passed in contenful query.
+            Contentful does not specify default, seems to be arbitrary.
+          */
+          orderBy: {
+            type: String,
+            notify: true,
+            value: ''
+          },
           debounceDuration: {
             type: Number,
             notify: true,
@@ -121,8 +146,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         if (!disabled) {
           this.debounce('getEntries', function () {
             if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
+
+              // this.skip = 5;
+              // this.limit = 5;
+
+              // modify searchParams
+              searchParams.base.limit = _this2.limit;
+              searchParams.base.skip = _this2.skip;
+              searchParams.base.order = _this2.orderBy;
+              console.log(searchParams.base);
+
               client.getEntries(searchParams.base).then(function (entries) {
-                return _this2.entries = entries;
+                _this2.entries = entries;
               }.bind(_this2));
             }
           }, debounceDuration);

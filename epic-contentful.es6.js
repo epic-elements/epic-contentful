@@ -63,6 +63,31 @@
           notify: true,
           value: () => ({})
         },
+        /*
+          Indicates "skip" value passed in contentful query. Helpful for pagination.
+        */
+        skip: {
+          type: Number,
+          notify: true,
+          value: 0 // default for contentful
+        },
+        /*
+          Indicates 'limit' value passed in contentful query. Helpful for pagination.
+        */
+        limit: {
+          type: Number,
+          notify: true,
+          value: 100 // default for contentful
+        },
+        /*
+          Indicates 'order' value passed in contenful query.
+          Contentful does not specify default, seems to be arbitrary.
+        */
+        orderBy: {
+          type: String,
+          notify: true,
+          value: ''
+        },
         debounceDuration: {
           type: Number,
           notify: true,
@@ -100,8 +125,18 @@
       if (!disabled) {
         this.debounce('getEntries', () => {
           if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
+
+            // modify searchParams
+            searchParams.base.limit = this.limit;
+            searchParams.base.skip = this.skip;
+            searchParams.base.order = this.orderBy;
+            console.log(searchParams.base);
+
             client.getEntries(searchParams.base)
-              .then((entries => this.entries = entries).bind(this));
+              .then(((entries) => {
+                  this.entries = entries;
+                }).bind(this)
+              );
           }
         }, debounceDuration);
       }
