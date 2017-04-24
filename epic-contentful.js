@@ -119,7 +119,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         this.observers = [
         // '_getSingleEntry(client, entryId, mode)',
         // '_getContentTypeSchema(client, contentType, mode)',
-        '_getEntries(disabled, client, searchParams.*, mode, debounceDuration)'];
+        '_getEntries(disabled, client, searchParams.*, mode, debounceDuration, limit, skip, orderBy)'];
       }
 
       // Property Observer Methods
@@ -141,7 +141,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
       }
     }, {
       key: '_getEntries',
-      value: function _getEntries(disabled, client, searchParams, mode, debounceDuration) {
+      value: function _getEntries(disabled, client, searchParams, mode, debounceDuration, limit, skip, orderBy) {
         var _this2 = this;
 
         if (!disabled) {

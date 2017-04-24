@@ -104,7 +104,7 @@
       this.observers = [
         // '_getSingleEntry(client, entryId, mode)',
         // '_getContentTypeSchema(client, contentType, mode)',
-        '_getEntries(disabled, client, searchParams.*, mode, debounceDuration)',
+        '_getEntries(disabled, client, searchParams.*, mode, debounceDuration, limit, skip, orderBy)',
       ];
     }
 
@@ -122,7 +122,7 @@
       }
     }
 
-    _getEntries(disabled, client, searchParams, mode, debounceDuration) {
+    _getEntries(disabled, client, searchParams, mode, debounceDuration, limit, skip, orderBy) {
       if (!disabled) {
         this.debounce('getEntries', () => {
           if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
