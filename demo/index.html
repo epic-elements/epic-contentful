@@ -18,33 +18,18 @@
 
     <div class="vertical-section-container centered">
       <h3>Basic epic-contentful Demo</h3>
-
-            <!-- <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
-                             space="1kzutnf7jc3r"
-                             entry-id="51N8w7az8A46WKY4OM64AW"
-                             content-type="videoCard"
-                             mode="entries"
-                             entries="{{entries}}"></epic-contentful> -->
-
-
-
-      <h3>Basic epic-contentful Demo</h3>
-
-            <template is="dom-bind">
-            <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
-                             space="1kzutnf7jc3r"
-                             entries="{{entries}}"
-                             content-type="ambassadors"
-                             limit="5"
-                             skip="2"
-                             mode="entries">
-            </epic-contentful>
-            <template is="dom-repeat" items="[[entries.items]]">
-                <div>[[item.fields.slug]]</div>
-            </template>
-            </template>
-
+        <template is="dom-bind">
+          <epic-contentful token="7293987ea91368b8cae485aeadc4037af8253ae4706e2fa0400f9a831aa93086"
+                           space="1kzutnf7jc3r"
+                           entries="{{entries}}"
+                           content-type="ambassadors"
+                           mode="entries">
+          </epic-contentful>
+          <template is="dom-repeat" items="[[entries.items]]">
+              <div>[[item.fields.slug]]</div>
+          </template>
+        </template>
     </div>
-
+    
   </body>
 </html>
