@@ -82,6 +82,7 @@
         /*
           Indicates 'order' value passed in contenful query.
           Contentful does not specify default, seems to be arbitrary.
+          Note you can prepend "-" to this to get reverse order.
         */
         orderBy: {
           type: String,
@@ -130,7 +131,6 @@
             searchParams.base.limit = this.limit;
             searchParams.base.skip = this.skip;
             searchParams.base.order = this.orderBy;
-            console.log(searchParams.base);
 
             client.getEntries(searchParams.base)
               .then(((entries) => {

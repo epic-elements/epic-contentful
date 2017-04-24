@@ -97,6 +97,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           /*
             Indicates 'order' value passed in contenful query.
             Contentful does not specify default, seems to be arbitrary.
+            Note you can prepend "-" to this to get reverse order.
           */
           orderBy: {
             type: String,
@@ -151,7 +152,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
               searchParams.base.limit = _this2.limit;
               searchParams.base.skip = _this2.skip;
               searchParams.base.order = _this2.orderBy;
-              console.log(searchParams.base);
 
               client.getEntries(searchParams.base).then(function (entries) {
                 _this2.entries = entries;
