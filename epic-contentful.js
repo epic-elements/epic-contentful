@@ -147,9 +147,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
           this.debounce('getEntries', function () {
             if (client && Object.keys(client).length > 0 && searchParams.base && Object.keys(searchParams.base).length > 0 && mode === 'entries') {
 
-              // this.skip = 5;
-              // this.limit = 5;
-
               // modify searchParams
               searchParams.base.limit = _this2.limit;
               searchParams.base.skip = _this2.skip;
