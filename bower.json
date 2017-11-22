@@ -12,5 +12,11 @@
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
     "web-component-tester": "^6.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+  },
+  "resolutions": {
+    "mocha": "^3.1.2",
+    "test-fixture": "^3.0.0",
+    "webcomponentsjs": "^v1.0.2",
+    "polymer": "^2.0.0"
   }
 }

@@ -1,0 +1,63 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="epic-contentful-params">
+  <template>
+    <content></content>
+  </template>
+
+  <script>
+    class EpicContentfulParams extends Polymer.Element {
+      static get is() { return 'epic-contentful-params' }
+
+      static get properties() {
+        return {
+          property: {
+            type: String,
+            notify: true,
+            value: ''
+          },
+          value: {
+            type: String,
+            notify: true,
+            value: ''
+          },
+          operator: {
+            type: String,
+            notify: true,
+            value: ''
+          },
+          config: {
+            type: Object,
+            notify: true,
+            computed: '_computeConfig(property, value)'
+          },
+        }
+      }
+
+      static get observers() {
+        return [
+          '_configChanged(config)'
+        ]
+      }
+
+      _configChanged(config) {
+        this.dispatchEvent(new CustomEvent('config-changed', {
+          detail: config
+        }));
+      }
+
+      _computeConfig(property, value) {
+        var obj = {};
+        if(!property || !value){
+          return obj;
+        } else {
+          obj[property] = value;
+          return obj;
+        }
+      }
+
+    };
+
+    window.customElements.define(EpicContentfulParams.is, EpicContentfulParams);
+  </script>
+</dom-module>
