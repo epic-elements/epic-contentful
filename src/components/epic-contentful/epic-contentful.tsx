@@ -92,6 +92,7 @@ export class EpicContentful {
   @Watch('response')
   responseChangeHandler(val) {
     this.entries = val.items ? val.items : [];
+    this.includes = val.includes ? val.includes : [];
   }
 
   /**
@@ -105,7 +106,19 @@ export class EpicContentful {
     this.entrieschange.emit(val);
   }
 
+  /**
+   * The resulting includes associated with
+   * the returned entries.
+   */
+  @State() includes: Array<any> = [];
+  @Watch('includes')
+  includesChangedHandler(val, oldVal) {
+    console.log(val, oldVal);
+    this.includeschange.emit(val);
+  }
+
   @Event() entrieschange: EventEmitter;
+  @Event() includeschange: EventEmitter;
 
   /**
    * The component is about to load and it has not
