@@ -24,7 +24,7 @@ export class EpicContentful {
   /**
    * The base URL for Contentful API
    */
-  @Prop() baseURL: string = 'https://cdn.contentful.com'
+  @Prop() baseURL: string = 'https://cdn.contentful.com';
 
   /**
    * The sys id of a contentful entry.
@@ -159,9 +159,6 @@ export class EpicContentful {
     if (!this.requestUrl) {
       return;
     }
-
-    // let response = await fetch(this.requestUrl).then(r => r.json());
     this.response = await fetch(this.requestUrl).then(r => r.json());
-    // console.log(response);
   }
 }
