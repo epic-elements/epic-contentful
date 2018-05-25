@@ -28,8 +28,54 @@ declare global {
 
   namespace StencilComponents {
     interface EpicContentful {
-      'first': string;
-      'last': string;
+      /**
+       * The base URL for Contentful API
+       */
+      'baseURL': string;
+      /**
+       * The content type of the requested contentful entry
+       */
+      'contentType': string;
+      /**
+       * disables the component. prevents api calls and events, etc.
+       */
+      'disabled': boolean;
+      /**
+       * The sys id of a contentful entry. Used to access a single entry by its id.
+       */
+      'entryId': string;
+      /**
+       * Which environment from which to pull entries
+       */
+      'environment': string;
+      /**
+       * Comma separated list of fields to include with the entry response.
+       */
+      'fields': string;
+      /**
+       * limits the entries to the number specified
+       */
+      'limit': number;
+      /**
+       * The field to use to sort the entries
+       */
+      'orderBy': string;
+      /**
+       * an optional search param string
+       */
+      'params': string;
+      /**
+       * The number of entries to skip
+       */
+      'skip': number;
+      /**
+       * The id of the contentful space
+       */
+      'space': string;
+      /**
+       * Access token generated to interface with specific contentful environments
+       */
+      'token': string;
     }
   }
 
@@ -52,8 +98,55 @@ declare global {
   }
   namespace JSXElements {
     export interface EpicContentfulAttributes extends HTMLAttributes {
-      'first'?: string;
-      'last'?: string;
+      /**
+       * The base URL for Contentful API
+       */
+      'baseURL'?: string;
+      /**
+       * The content type of the requested contentful entry
+       */
+      'contentType'?: string;
+      /**
+       * disables the component. prevents api calls and events, etc.
+       */
+      'disabled'?: boolean;
+      /**
+       * The sys id of a contentful entry. Used to access a single entry by its id.
+       */
+      'entryId'?: string;
+      /**
+       * Which environment from which to pull entries
+       */
+      'environment'?: string;
+      /**
+       * Comma separated list of fields to include with the entry response.
+       */
+      'fields'?: string;
+      /**
+       * limits the entries to the number specified
+       */
+      'limit'?: number;
+      'onEntrieschange'?: (event: CustomEvent) => void;
+      /**
+       * The field to use to sort the entries
+       */
+      'orderBy'?: string;
+      /**
+       * an optional search param string
+       */
+      'params'?: string;
+      /**
+       * The number of entries to skip
+       */
+      'skip'?: number;
+      /**
+       * The id of the contentful space
+       */
+      'space'?: string;
+      /**
+       * Access token generated to interface with specific contentful environments
+       */
+      'token'?: string;
     }
   }
 }
